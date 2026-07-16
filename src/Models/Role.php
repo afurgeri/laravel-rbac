@@ -66,7 +66,8 @@ class Role extends Model implements HasCrudDefinitionContract
      */
     private function userModel(): string
     {
-        $userModel = config('rbac.models.user', 'App\\Models\\User');
+        $userModel = config('rbac.models.user')
+            ?? config('auth.providers.users.model', 'App\\Models\\User');
 
         if (! is_string($userModel) || ! class_exists($userModel) || ! is_subclass_of($userModel, Model::class)) {
             throw new \InvalidArgumentException('The configured RBAC user model must be an Eloquent model class.');
