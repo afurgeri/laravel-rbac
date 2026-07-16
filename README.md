@@ -1,0 +1,125 @@
+# Laravel RBAC
+
+Roles, permissions, role assignment, and permission middleware for Laravel applications. The package depends on [`afurgeri/laravel-crud`](https://github.com/afurgeri/laravel-crud) for reusable CRUD definitions.
+
+## Scope
+
+This package provides the reusable RBAC core:
+
+- `Role` and `Permission` models;
+- `HasRoles` and `HasPermissions` integration contracts;
+- permission middleware;
+- configurable RBAC tables and user model;
+- migrations and permission seeders;
+- role authorization through Laravel policies;
+- optional CRUD integration for the `Role` model.
+
+Resource-specific user CRUD, Inertia controllers, routes, navigation, and Vue pages belong in the consuming application.
+
+## Installation
+
+```bash
+composer require afurgeri/laravel-rbac
+```
+
+Both the RBAC and CRUD service providers are registered through Laravel package discovery.
+
+If Packagist is temporarily unavailable, add the GitHub repositories as temporary VCS sources:
+
+```json
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/afurgeri/laravel-crud"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/afurgeri/laravel-rbac"
+        }
+    ]
+}
+```
+
+Then require the tagged versions:
+
+```bash
+composer require afurgeri/laravel-crud:^0.2 afurgeri/laravel-rbac:^0.1
+```
+
+## User model integration
+
+The application's authenticatable model must use `HasRoles` and implement `HasPermissions`:
+
+```php
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Modules\Rbac\Concerns\HasRoles;
+use Modules\Rbac\Contracts\HasPermissions;
+
+class User extends Authenticatable implements HasPermissions
+{
+    use HasRoles;
+}
+```
+
+Configure the model and table names in the application's `config/rbac.php`:
+
+```php
+return [
+    'models' => [
+        'user' => App\Models\User::class,
+    ],
+    'tables' => [
+        'roles' => 'roles',
+        'permissions' => 'permissions',
+        'users' => 'users',
+        'role_user' => 'role_user',
+        'permission_role' => 'permission_role',
+    ],
+    'protected_role' => 'admin',
+];
+```
+
+Publish the configuration and migrations when they need to be customized:
+
+```bash
+php artisan vendor:publish --tag=rbac-config
+php artisan vendor:publish --tag=rbac-migrations
+php artisan migrate
+```
+
+## Permissions
+
+Use `hasPermission()` in application authorization logic:
+
+```php
+if ($user->hasPermission('reports.view')) {
+    // ...
+}
+```
+
+Protect routes with the registered `permission` middleware:
+
+```php
+Route::get('/reports', ReportController::class)
+    ->middleware('permission:reports.view');
+```
+
+Application-specific permission constants should be declared by the application or a dependent package. The bundled `RbacPermissions` list contains the permissions used by the companion scaffold.
+
+## CRUD integration
+
+`Role` implements the CRUD definition bridge and can be used with `CrudIndexManager`, `CrudSchemaManager`, and `CrudMutationManager` from `afurgeri/laravel-crud`.
+
+The package does not provide user CRUD because user fields, password handling, policies, routes, and frontend pages differ between applications.
+
+## Service provider behavior
+
+The provider automatically:
+
+- merges the default `rbac` configuration;
+- loads RBAC migrations and JSON translations;
+- registers the `permission` middleware alias;
+- exposes configuration and migration publish tags.
+
+It does not register web routes or Inertia pages.
