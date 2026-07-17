@@ -4,6 +4,7 @@ namespace Modules\Rbac;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Modules\Rbac\Console\Commands\InstallRbacCommand;
 use Modules\Rbac\Http\Middleware\EnsureUserHasPermission;
 
 class RbacServiceProvider extends ServiceProvider
@@ -18,6 +19,12 @@ class RbacServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                InstallRbacCommand::class,
+            ]);
+        }
+
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadJsonTranslationsFrom(__DIR__.'/../lang');
 

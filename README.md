@@ -24,6 +24,15 @@ composer require afurgeri/laravel-rbac
 
 Both the RBAC and CRUD service providers are registered through Laravel package discovery.
 
+After installing both packages, generate the application integration with:
+
+```bash
+php artisan crud:install
+php artisan rbac:install
+```
+
+`rbac:install` generates the user/role CRUD definitions, controllers, policy, routes, and Inertia/Vue pages. It requires the generic CRUD frontend files from `crud:install` and reports the required `User` model integration without modifying the model automatically.
+
 If Packagist is temporarily unavailable, add the GitHub repositories as temporary VCS sources:
 
 ```json
