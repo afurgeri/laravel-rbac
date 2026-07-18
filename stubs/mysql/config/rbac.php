@@ -1,12 +1,15 @@
 <?php
 
+use Modules\Rbac\Models\Permission;
+use Modules\Rbac\Models\Role;
+
 return [
     'storage' => 'mysql',
 
     'models' => [
         'user' => null,
-        'role' => null,
-        'permission' => null,
+        'role' => Role::class,
+        'permission' => Permission::class,
     ],
 
     'tables' => [

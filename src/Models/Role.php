@@ -11,6 +11,7 @@ use Modules\Crud\Concerns\HasCrudDefinition;
 use Modules\Crud\Contracts\HasCrudDefinition as HasCrudDefinitionContract;
 use Modules\Rbac\Crud\RoleCrudDefinition;
 use Modules\Rbac\Policies\RolePolicy;
+use Modules\Rbac\RbacModels;
 
 /**
  * @property int $id
@@ -29,12 +30,14 @@ class Role extends Model implements HasCrudDefinitionContract
     }
 
     /**
-     * @return BelongsToMany<Permission, $this>
+     * @return BelongsToMany<Model, $this>
      */
     public function permissions(): BelongsToMany
     {
+        $permissionModel = RbacModels::permission();
+
         return $this->belongsToMany(
-            Permission::class,
+            $permissionModel,
             (string) config('rbac.tables.permission_role', 'permission_role'),
             'role_id',
             'permission_id',

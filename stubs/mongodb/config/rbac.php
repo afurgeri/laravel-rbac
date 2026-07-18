@@ -1,12 +1,15 @@
 <?php
 
+use Modules\Rbac\Models\MongoPermission;
+use Modules\Rbac\Models\MongoRole;
+
 return [
-    'storage' => 'mysql',
+    'storage' => 'mongodb',
 
     'models' => [
         'user' => null,
-        'role' => null,
-        'permission' => null,
+        'role' => MongoRole::class,
+        'permission' => MongoPermission::class,
     ],
 
     'tables' => [

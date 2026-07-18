@@ -6,7 +6,7 @@ Roles, permissions, role assignment, and permission middleware for Laravel appli
 
 This package provides the reusable RBAC core:
 
-- `Role` and `Permission` models;
+- SQL and MongoDB role and permission models;
 - `HasRoles` and `HasPermissions` integration contracts;
 - permission middleware;
 - configurable RBAC tables and user model;
@@ -28,10 +28,19 @@ After installing both packages, generate the application integration with:
 
 ```bash
 php artisan crud:install
-php artisan rbac:install
+php artisan rbac:install --database=mysql
 ```
 
 `rbac:install` generates the user/role CRUD definitions, controllers, policy, routes, and Inertia/Vue pages. It requires the generic CRUD frontend files from `crud:install` and reports the required `User` model integration without modifying the model automatically.
+
+For MongoDB, install the official driver in the consuming application and select the MongoDB integration stubs:
+
+```bash
+composer require mongodb/laravel-mongodb
+php artisan rbac:install --database=mongodb
+```
+
+The installer generates explicit `Role` and `Permission` model configuration for the selected connector. It does not generate or modify the application's authenticatable `User` model.
 
 If Packagist is temporarily unavailable, add the GitHub repositories as temporary VCS sources:
 
@@ -71,7 +80,7 @@ class User extends Authenticatable implements HasPermissions
 }
 ```
 
-Configure the model and table names in the application's `config/rbac.php`:
+Configure the model and table names in the application's `config/rbac.php`. The installer writes the explicit `role` and `permission` classes for its selected connector:
 
 ```php
 return [
@@ -121,6 +130,17 @@ Application-specific permission constants should be declared by the application 
 `Role` implements the CRUD definition bridge and can be used with `CrudIndexManager`, `CrudSchemaManager`, and `CrudMutationManager` from `afurgeri/laravel-crud`.
 
 The package does not provide user CRUD because user fields, password handling, policies, routes, and frontend pages differ between applications.
+
+## MongoDB behavior
+
+MongoDB uses `MongoRole` and `MongoPermission` with `permission_ids`, `role_ids`, and user `role_ids` arrays instead of SQL pivot tables. The package migration owns only the `roles` and `permissions` collections; the consuming application owns its `users` collection and its indexes.
+
+MongoDB integration tests are separate from the default SQL suite. From the package repository, install the optional test dependency, enable the MongoDB PHP extension, start MongoDB, and run:
+
+```bash
+composer require mongodb/laravel-mongodb:^5.8 --dev
+composer test:mongodb
+```
 
 ## Service provider behavior
 

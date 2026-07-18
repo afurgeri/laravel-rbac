@@ -16,7 +16,7 @@ import password from '@/routes/users/password';
 
 const props = defineProps<{
     user: {
-        id: number;
+        id: string | number;
         name: string;
     };
 }>();

@@ -12,10 +12,10 @@ import {
 import type { CrudRecord, CrudSchema } from '@/types/crud';
 
 type User = CrudRecord & {
-    id: number;
+    id: string | number;
     name: string;
     email: string;
-    role_ids: number[];
+    role_ids: Array<string | number>;
     can: {
         update: boolean;
         delete: boolean;
@@ -23,7 +23,7 @@ type User = CrudRecord & {
 };
 
 type Role = {
-    id: number;
+    id: string | number;
     name: string;
 };
 

@@ -3,7 +3,7 @@
 namespace Modules\Rbac\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Rbac\Models\Permission;
+use Modules\Rbac\RbacModels;
 use Modules\Rbac\RbacPermissions;
 
 class RbacPermissionSeeder extends Seeder
@@ -13,11 +13,16 @@ class RbacPermissionSeeder extends Seeder
      */
     public function run(): void
     {
+        $permissionModel = RbacModels::permission();
+
         foreach (RbacPermissions::all() as $permission) {
-            Permission::updateOrCreate(
-                ['name' => $permission],
-                ['name' => $permission],
-            );
+            $attributes = ['name' => $permission];
+
+            if (config('rbac.storage', 'mysql') === 'mongodb') {
+                $attributes['role_ids'] = [];
+            }
+
+            $permissionModel::updateOrCreate(['name' => $permission], $attributes);
         }
     }
 }

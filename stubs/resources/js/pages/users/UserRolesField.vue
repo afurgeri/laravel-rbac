@@ -2,14 +2,14 @@
 import InputError from '@/components/InputError.vue';
 
 type Role = {
-    id: number;
+    id: string | number;
     name: string;
 };
 
 withDefaults(
     defineProps<{
         roles: Role[];
-        selectedIds?: number[];
+        selectedIds?: Array<string | number>;
         error?: string;
     }>(),
     {

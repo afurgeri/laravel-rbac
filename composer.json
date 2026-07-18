@@ -17,6 +17,9 @@
         "pestphp/pest": "^4.7",
         "pestphp/pest-plugin-laravel": "^4.1"
     },
+    "suggest": {
+        "mongodb/laravel-mongodb": "Enable the optional MongoDB RBAC integration test suite and MongoDB-backed roles and permissions."
+    },
     "autoload": {
         "psr-4": {
             "Modules\\Rbac\\": "src/",
@@ -37,6 +40,7 @@
     },
     "scripts": {
         "test": "pest --compact",
+        "test:mongodb": "pest --compact --configuration phpunit.mongodb.xml",
         "lint": "pint --test --format agent"
     },
     "config": {

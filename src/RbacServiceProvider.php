@@ -25,7 +25,11 @@ class RbacServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(
+            config('rbac.storage', 'mysql') === 'mongodb'
+                ? __DIR__.'/../database/migrations-mongodb'
+                : __DIR__.'/../database/migrations',
+        );
         $this->loadJsonTranslationsFrom(__DIR__.'/../lang');
 
         Route::aliasMiddleware('permission', EnsureUserHasPermission::class);

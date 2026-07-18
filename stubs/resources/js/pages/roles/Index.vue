@@ -11,9 +11,9 @@ import {
 import type { CrudRecord, CrudSchema } from '@/types/crud';
 
 type Role = CrudRecord & {
-    id: number;
+    id: string | number;
     name: string;
-    permission_ids: number[];
+    permission_ids: Array<string | number>;
     can: {
         update: boolean;
         delete: boolean;
@@ -21,7 +21,7 @@ type Role = CrudRecord & {
 };
 
 type Permission = {
-    id: number;
+    id: string | number;
     name: string;
 };
 

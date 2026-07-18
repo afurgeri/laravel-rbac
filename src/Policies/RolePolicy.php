@@ -2,8 +2,8 @@
 
 namespace Modules\Rbac\Policies;
 
+use Illuminate\Database\Eloquent\Model;
 use Modules\Rbac\Contracts\HasPermissions;
-use Modules\Rbac\Models\Role;
 use Modules\Rbac\RbacPermissions;
 
 class RolePolicy
@@ -18,15 +18,15 @@ class RolePolicy
         return $user->hasPermission(RbacPermissions::CREATE_ROLES);
     }
 
-    public function update(HasPermissions $user, Role $role): bool
+    public function update(HasPermissions $user, Model $role): bool
     {
-        return $role->name !== config('rbac.protected_role', 'admin')
+        return $role->getAttribute('name') !== config('rbac.protected_role', 'admin')
             && $user->hasPermission(RbacPermissions::UPDATE_ROLES);
     }
 
-    public function delete(HasPermissions $user, Role $role): bool
+    public function delete(HasPermissions $user, Model $role): bool
     {
-        return $role->name !== config('rbac.protected_role', 'admin')
+        return $role->getAttribute('name') !== config('rbac.protected_role', 'admin')
             && $user->hasPermission(RbacPermissions::DELETE_ROLES);
     }
 }

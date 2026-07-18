@@ -11,7 +11,7 @@ use Modules\Crud\Contracts\HasDefaultCrudSort;
 use Modules\Crud\CrudColumn;
 use Modules\Crud\CrudDefinition;
 use Modules\Crud\CrudField;
-use Modules\Rbac\Models\Role;
+use Modules\Rbac\RbacModels;
 
 class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasDefaultCrudSort
 {
@@ -22,7 +22,7 @@ class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
      */
     public function model(): string
     {
-        return Role::class;
+        return RbacModels::role();
     }
 
     public function title(): string
@@ -58,7 +58,9 @@ class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
 
     public function eagerLoads(): array
     {
-        return ['permissions:id,name'];
+        return config('rbac.storage', 'mysql') === 'mongodb'
+            ? ['permissions:id,name,role_ids']
+            : ['permissions:id,name'];
     }
 
     public function defaultSortColumn(): string

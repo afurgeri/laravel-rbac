@@ -2,14 +2,14 @@
 import InputError from '@/components/InputError.vue';
 
 type Permission = {
-    id: number;
+    id: string | number;
     name: string;
 };
 
 withDefaults(
     defineProps<{
         permissions: Permission[];
-        selectedIds?: number[];
+        selectedIds?: Array<string | number>;
         error?: string;
     }>(),
     {

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 
 class InstallRbacCommand extends Command
 {
-    protected $signature = 'rbac:install {--force : Overwrite existing RBAC integration files}';
+    protected $signature = 'rbac:install {--database=mysql : The database connector to target (mysql or mongodb)} {--force : Overwrite existing RBAC integration files}';
 
     protected $description = 'Install the RBAC application integration';
 
@@ -15,10 +15,6 @@ class InstallRbacCommand extends Command
      * @var array<string, string>
      */
     private const FILES = [
-        'config/rbac.php' => 'config/rbac.php',
-        'stubs/app/Crud/UserCrudDefinition.php' => 'app/Crud/UserCrudDefinition.php',
-        'stubs/app/Http/Controllers/Rbac/RoleController.php' => 'app/Http/Controllers/Rbac/RoleController.php',
-        'stubs/app/Http/Controllers/Rbac/UserController.php' => 'app/Http/Controllers/Rbac/UserController.php',
         'stubs/app/Policies/UserPolicy.php' => 'app/Policies/UserPolicy.php',
         'stubs/routes-rbac.php' => 'routes/rbac.php',
         'stubs/resources/js/pages/roles/Index.vue' => 'resources/js/pages/roles/Index.vue',
@@ -30,6 +26,20 @@ class InstallRbacCommand extends Command
 
     public function handle(): int
     {
+        $database = $this->option('database');
+
+        if (! in_array($database, ['mysql', 'mongodb'], true)) {
+            $this->components->error('The --database option must be either mysql or mongodb.');
+
+            return self::FAILURE;
+        }
+
+        if ($database === 'mongodb' && ! class_exists('MongoDB\\Laravel\\Eloquent\\Model')) {
+            $this->components->error('MongoDB support is not installed. Run [composer require mongodb/laravel-mongodb] first.');
+
+            return self::FAILURE;
+        }
+
         if (! File::exists(base_path('resources/js/components/crud/CrudPage.vue'))) {
             $this->components->error('Generic CRUD frontend files are missing. Run [php artisan crud:install] first.');
 
@@ -39,7 +49,7 @@ class InstallRbacCommand extends Command
         $packageRoot = dirname(__DIR__, 3);
         $targets = [];
 
-        foreach (self::FILES as $source => $target) {
+        foreach ($this->filesFor($database) as $source => $target) {
             $targets[] = [
                 'source' => $packageRoot.'/'.$source,
                 'target' => base_path($target),
@@ -71,10 +81,36 @@ class InstallRbacCommand extends Command
         $this->components->info('RBAC application integration installed.');
         $this->newLine();
         $this->components->warn('Update App\\Models\\User to use HasRoles and implement HasPermissions.');
-        $this->line('Then run: php artisan migrate');
+        $this->line($database === 'mongodb'
+            ? 'Then configure the MongoDB connection and run your application seeders.'
+            : 'Then run: php artisan migrate');
         $this->line('Then register your application seeders in DatabaseSeeder.');
 
         return self::SUCCESS;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function filesFor(string $database): array
+    {
+        $files = [
+            "stubs/{$database}/config/rbac.php" => 'config/rbac.php',
+        ];
+
+        $files += $database === 'mongodb'
+            ? [
+                'stubs/mongodb/app/Crud/UserCrudDefinition.php' => 'app/Crud/UserCrudDefinition.php',
+                'stubs/mongodb/app/Http/Controllers/Rbac/RoleController.php' => 'app/Http/Controllers/Rbac/RoleController.php',
+                'stubs/mongodb/app/Http/Controllers/Rbac/UserController.php' => 'app/Http/Controllers/Rbac/UserController.php',
+            ]
+            : [
+                'stubs/app/Crud/UserCrudDefinition.php' => 'app/Crud/UserCrudDefinition.php',
+                'stubs/app/Http/Controllers/Rbac/RoleController.php' => 'app/Http/Controllers/Rbac/RoleController.php',
+                'stubs/app/Http/Controllers/Rbac/UserController.php' => 'app/Http/Controllers/Rbac/UserController.php',
+            ];
+
+        return [...$files, ...self::FILES];
     }
 
     private function appendRouteRequire(): void
