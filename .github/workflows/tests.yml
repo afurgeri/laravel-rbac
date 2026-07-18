@@ -37,3 +37,40 @@ jobs:
 
             - name: Run tests
               run: composer test
+
+    mongodb:
+        runs-on: ubuntu-latest
+        services:
+            mongodb:
+                image: mongo:8.0
+                ports:
+                    - 27017:27017
+                options: >-
+                    --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.3'
+                  extensions: mbstring, dom, fileinfo, mongodb
+                  coverage: none
+                  tools: composer:v2
+
+            - name: Validate Composer manifest
+              run: composer validate --strict --no-check-publish
+
+            - name: Install dependencies
+              run: composer update --no-interaction --no-progress
+
+            - name: Install MongoDB integration dependency
+              run: composer require mongodb/laravel-mongodb:^5.8 --dev --no-interaction --no-progress
+
+            - name: Run MongoDB integration tests
+              run: composer test:mongodb

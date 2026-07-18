@@ -62,7 +62,7 @@ If Packagist is temporarily unavailable, add the GitHub repositories as temporar
 Then require the tagged versions:
 
 ```bash
-composer require afurgeri/laravel-crud:^0.2 afurgeri/laravel-rbac:^0.1
+composer require afurgeri/laravel-crud:^0.4 afurgeri/laravel-rbac:^0.3
 ```
 
 ## User model integration
@@ -80,7 +80,7 @@ class User extends Authenticatable implements HasPermissions
 }
 ```
 
-Configure the model and table names in the application's `config/rbac.php`. The installer writes the explicit `role` and `permission` classes for its selected connector:
+Configure the application user model in `config/rbac.php`. The installer writes the explicit `role` and `permission` classes for its selected connector, but leaves `models.user` unset because it must point to the consuming application's authenticatable model:
 
 ```php
 return [
@@ -134,6 +134,8 @@ The package does not provide user CRUD because user fields, password handling, p
 ## MongoDB behavior
 
 MongoDB uses `MongoRole` and `MongoPermission` with `permission_ids`, `role_ids`, and user `role_ids` arrays instead of SQL pivot tables. The package migration owns only the `roles` and `permissions` collections; the consuming application owns its `users` collection and its indexes.
+
+The MongoDB installer sets `storage` to `mongodb` and configures `MongoRole::class` and `MongoPermission::class`. Configure the application's MongoDB `User` model, set `models.user`, and add an index for its `role_ids` array when role-based lookups need to scale. The SQL installer instead configures `Role::class` and `Permission::class` and uses the configured pivot tables.
 
 MongoDB integration tests are separate from the default SQL suite. From the package repository, install the optional test dependency, enable the MongoDB PHP extension, start MongoDB, and run:
 
