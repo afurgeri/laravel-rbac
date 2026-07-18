@@ -7,13 +7,14 @@ use Modules\Crud\Concerns\AuthorizesViaGate;
 use Modules\Crud\Contracts\AuthorizesCrudIndex;
 use Modules\Crud\Contracts\AuthorizesCrudMutations;
 use Modules\Crud\Contracts\EagerLoadsCrudRelations;
+use Modules\Crud\Contracts\HasDefaultCrudPageSize;
 use Modules\Crud\Contracts\HasDefaultCrudSort;
 use Modules\Crud\CrudColumn;
 use Modules\Crud\CrudDefinition;
 use Modules\Crud\CrudField;
 use Modules\Rbac\RbacModels;
 
-class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasDefaultCrudSort
+class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasDefaultCrudPageSize, HasDefaultCrudSort
 {
     use AuthorizesViaGate;
 
@@ -71,5 +72,10 @@ class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
     public function defaultSortDirection(): string
     {
         return 'asc';
+    }
+
+    public function defaultPageSize(): int
+    {
+        return 10;
     }
 }
