@@ -13,6 +13,11 @@ class RolePolicy
         return $user->hasPermission(RbacPermissions::VIEW_ROLES);
     }
 
+    public function view(HasPermissions $user, Model $role): bool
+    {
+        return $user->hasPermission(RbacPermissions::VIEW_ROLES);
+    }
+
     public function create(HasPermissions $user): bool
     {
         return $user->hasPermission(RbacPermissions::CREATE_ROLES);
