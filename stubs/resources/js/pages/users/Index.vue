@@ -4,12 +4,15 @@ import CrudPage from '@/components/crud/CrudPage.vue';
 import UserPasswordDialog from '@/pages/users/UserPasswordDialog.vue';
 import UserRolesField from '@/pages/users/UserRolesField.vue';
 import {
+    create as createUser,
     destroy as destroyUser,
+    edit as editUser,
     index as usersIndex,
+    show as showUser,
     store as storeUser,
     update as updateUser,
 } from '@/routes/users';
-import type { CrudRecord, CrudSchema } from '@/types/crud';
+import type { CrudPaginator, CrudRecord, CrudSchema } from '@/types/crud';
 
 type User = CrudRecord & {
     id: string | number;
@@ -17,6 +20,7 @@ type User = CrudRecord & {
     email: string;
     role_ids: Array<string | number>;
     can: {
+        show: boolean;
         update: boolean;
         delete: boolean;
     };
@@ -27,14 +31,9 @@ type Role = {
     name: string;
 };
 
-type PaginatedUsers = {
-    data: User[];
-    total: number;
-};
-
 defineProps<{
     crud: CrudSchema;
-    users: PaginatedUsers;
+    users: CrudPaginator<User>;
     roles: Role[];
     can: {
         create: boolean;
@@ -58,9 +57,10 @@ defineOptions({
 
     <CrudPage
         :schema="crud"
-        :records="users.data"
+        :records="users"
         :create="{
             can: can.create,
+            href: createUser(),
             action: storeUser.form(),
             label: 'Create user',
             title: 'Create user',
@@ -68,9 +68,15 @@ defineOptions({
         }"
         :edit="{
             action: (record) => updateUser.form.patch(record.id),
+            href: (record) => editUser(record.id),
             can: (record) => record.can.update,
             title: (record) => `Edit ${record.name}`,
             description: 'Update the user details and assigned roles.',
+        }"
+        :show="{
+            href: (record) => showUser(record.id),
+            can: (record) => record.can.show,
+            title: (record) => `View ${record.name}`,
         }"
         :destroy="{
             action: (record) => destroyUser.form.delete(record.id),

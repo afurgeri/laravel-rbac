@@ -13,6 +13,8 @@ use Inertia\Response;
 use Modules\Crud\Contracts\AuthorizesCrudMutations;
 use Modules\Crud\CrudIndexManager;
 use Modules\Crud\CrudMutationManager;
+use Modules\Crud\CrudOperation;
+use Modules\Crud\CrudOperationGuard;
 use Modules\Crud\CrudSchemaManager;
 use Modules\Rbac\Models\MongoRole;
 
@@ -27,14 +29,14 @@ class UserController
         $filters = $request->array('filters');
 
         /** @var LengthAwarePaginator<int, User> $users */
-        $users = $index->paginate($definition, $request->integer('page', 1), $request->integer('per_page', 15), $sort, $direction, $search, $filters);
+        $users = $index->paginate($definition, $request->integer('page', 1), $request->has('per_page') ? $request->integer('per_page') : null, $sort, $direction, $search, $filters);
 
         $users->through(fn (User $user): array => [
             'id' => (string) $user->getKey(),
             'name' => $user->name,
             'email' => $user->email,
             'role_ids' => $user->roles->map(fn (MongoRole $role): string => (string) $role->getKey())->all(),
-            'can' => ['update' => Gate::allows('update', $user), 'delete' => Gate::allows('delete', $user)],
+            'can' => ['update' => Gate::allows('update', $user), 'delete' => Gate::allows('delete', $user), 'show' => Gate::allows('view', $user)],
         ]);
 
         return Inertia::render('users/Index', [
@@ -42,6 +44,21 @@ class UserController
             'users' => $users,
             'roles' => $this->availableRoles(),
             'can' => ['create' => Gate::allows('create', User::class)],
+        ]);
+    }
+
+    public function create(CrudSchemaManager $schema): Response
+    {
+        $definition = User::makeCrudDefinition();
+        CrudOperationGuard::ensureEnabled($definition, CrudOperation::Create);
+
+        if ($definition instanceof AuthorizesCrudMutations) {
+            $definition->authorizeCreate();
+        }
+
+        return Inertia::render('users/Create', [
+            'crud' => $schema->for($definition, 'users'),
+            'roles' => $this->availableRoles(),
         ]);
     }
 
@@ -59,6 +76,45 @@ class UserController
         Inertia::flash('toast', ['type' => 'success', 'message' => __('User created.')]);
 
         return to_route('users.index');
+    }
+
+    public function edit(User $user, CrudSchemaManager $schema): Response
+    {
+        $definition = User::makeCrudDefinition();
+        CrudOperationGuard::ensureEnabled($definition, CrudOperation::Update);
+
+        if ($definition instanceof AuthorizesCrudMutations) {
+            $definition->authorizeUpdate($user);
+        }
+
+        return Inertia::render('users/Edit', [
+            'crud' => $schema->for($definition, 'users'),
+            'user' => [
+                'id' => (string) $user->getKey(),
+                'name' => $user->name,
+                'email' => $user->email,
+                'role_ids' => $user->roles()->pluck('id')->map(fn (mixed $id): string => (string) $id)->all(),
+            ],
+            'roles' => $this->availableRoles(),
+        ]);
+    }
+
+    public function show(User $user, CrudSchemaManager $schema): Response
+    {
+        $definition = User::makeCrudDefinition();
+        CrudOperationGuard::ensureEnabled($definition, CrudOperation::Show);
+        Gate::authorize('view', $user);
+
+        return Inertia::render('users/Show', [
+            'crud' => $schema->for($definition, 'users'),
+            'user' => [
+                'id' => (string) $user->getKey(),
+                'name' => $user->name,
+                'email' => $user->email,
+                'role_ids' => $user->roles()->pluck('id')->map(fn (mixed $id): string => (string) $id)->all(),
+            ],
+            'roles' => $this->availableRoles(),
+        ]);
     }
 
     public function update(Request $request, User $user, CrudMutationManager $mutations): RedirectResponse

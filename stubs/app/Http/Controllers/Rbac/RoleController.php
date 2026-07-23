@@ -11,6 +11,8 @@ use Inertia\Response;
 use Modules\Crud\Contracts\AuthorizesCrudMutations;
 use Modules\Crud\CrudIndexManager;
 use Modules\Crud\CrudMutationManager;
+use Modules\Crud\CrudOperation;
+use Modules\Crud\CrudOperationGuard;
 use Modules\Crud\CrudSchemaManager;
 use Modules\Rbac\Models\Permission;
 use Modules\Rbac\Models\Role;
@@ -30,7 +32,7 @@ class RoleController
         $roles = $index->paginate(
             definition: $definition,
             page: $request->integer('page', 1),
-            perPage: $request->integer('per_page', 15),
+            perPage: $request->has('per_page') ? $request->integer('per_page') : null,
             sort: $sort,
             direction: $direction,
             search: $search,
@@ -44,6 +46,7 @@ class RoleController
             'can' => [
                 'update' => Gate::allows('update', $role),
                 'delete' => Gate::allows('delete', $role),
+                'show' => Gate::allows('view', $role),
             ],
         ]);
 
@@ -54,6 +57,21 @@ class RoleController
             'can' => [
                 'create' => Gate::allows('create', Role::class),
             ],
+        ]);
+    }
+
+    public function create(CrudSchemaManager $schema): Response
+    {
+        $definition = Role::makeCrudDefinition();
+        CrudOperationGuard::ensureEnabled($definition, CrudOperation::Create);
+
+        if ($definition instanceof AuthorizesCrudMutations) {
+            $definition->authorizeCreate();
+        }
+
+        return Inertia::render('roles/Create', [
+            'crud' => $schema->for($definition, 'roles'),
+            'permissions' => $this->availablePermissions(),
         ]);
     }
 
@@ -75,6 +93,43 @@ class RoleController
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Role created.')]);
 
         return to_route('roles.index');
+    }
+
+    public function edit(Role $role, CrudSchemaManager $schema): Response
+    {
+        $definition = Role::makeCrudDefinition();
+        CrudOperationGuard::ensureEnabled($definition, CrudOperation::Update);
+
+        if ($definition instanceof AuthorizesCrudMutations) {
+            $definition->authorizeUpdate($role);
+        }
+
+        return Inertia::render('roles/Edit', [
+            'crud' => $schema->for($definition, 'roles'),
+            'role' => [
+                'id' => $role->getKey(),
+                'name' => $role->name,
+                'permission_ids' => $role->permissions()->pluck('id')->all(),
+            ],
+            'permissions' => $this->availablePermissions(),
+        ]);
+    }
+
+    public function show(Role $role, CrudSchemaManager $schema): Response
+    {
+        $definition = Role::makeCrudDefinition();
+        CrudOperationGuard::ensureEnabled($definition, CrudOperation::Show);
+        Gate::authorize('view', $role);
+
+        return Inertia::render('roles/Show', [
+            'crud' => $schema->for($definition, 'roles'),
+            'role' => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'permission_ids' => $role->permissions()->pluck('id')->all(),
+            ],
+            'permissions' => $this->availablePermissions(),
+        ]);
     }
 
     public function update(Request $request, Role $role, CrudMutationManager $mutations): RedirectResponse

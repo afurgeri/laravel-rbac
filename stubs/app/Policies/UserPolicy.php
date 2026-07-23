@@ -12,6 +12,11 @@ class UserPolicy
         return $user->hasPermission(RbacPermissions::VIEW_USERS);
     }
 
+    public function view(User $user, User $model): bool
+    {
+        return $user->hasPermission(RbacPermissions::VIEW_USERS);
+    }
+
     public function create(User $user): bool
     {
         return $user->hasPermission(RbacPermissions::CREATE_USERS);
