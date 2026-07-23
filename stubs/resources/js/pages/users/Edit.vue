@@ -36,7 +36,7 @@ defineOptions({
 
     <CrudFormPage
         :schema="crud"
-        :action="updateUser.form.patch(user.id)"
+         :action="updateUser.form.patch(String(user.id))"
         :back-href="usersIndex()"
         :title="`Edit ${user.name}`"
         description="Update the user details and assigned roles."

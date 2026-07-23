@@ -40,7 +40,7 @@ const props = defineProps<{
             </DialogHeader>
 
             <Form
-                v-bind="password.update.form.patch(props.user.id)"
+                 v-bind="password.update.form.patch(String(props.user.id))"
                 v-slot="{ errors, processing }"
                 reset-on-success
                 class="flex flex-col gap-4 px-1 pb-6"

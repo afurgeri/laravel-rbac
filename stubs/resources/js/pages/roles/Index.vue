@@ -65,19 +65,19 @@ defineOptions({
             description: 'Add a new role and choose its permissions.',
         }"
         :edit="{
-            action: (record) => updateRole.form.patch(record.id),
-            href: (record) => editRole(record.id),
+             action: (record) => updateRole.form.patch(String(record.id)),
+             href: (record) => editRole(String(record.id)),
             can: (record) => record.can.update,
             title: (record) => `Edit ${record.name}`,
             description: 'Update the role details and assigned permissions.',
         }"
         :show="{
-            href: (record) => showRole(record.id),
+             href: (record) => showRole(String(record.id)),
             can: (record) => record.can.show,
             title: (record) => `View ${record.name}`,
         }"
         :destroy="{
-            action: (record) => destroyRole.form.delete(record.id),
+             action: (record) => destroyRole.form.delete(String(record.id)),
             can: (record) => record.can.delete,
             title: (record) => `Delete ${record.name}?`,
         }"

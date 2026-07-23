@@ -67,19 +67,19 @@ defineOptions({
             description: 'Add a new user and choose their roles.',
         }"
         :edit="{
-            action: (record) => updateUser.form.patch(record.id),
-            href: (record) => editUser(record.id),
+             action: (record) => updateUser.form.patch(String(record.id)),
+             href: (record) => editUser(String(record.id)),
             can: (record) => record.can.update,
             title: (record) => `Edit ${record.name}`,
             description: 'Update the user details and assigned roles.',
         }"
         :show="{
-            href: (record) => showUser(record.id),
+             href: (record) => showUser(String(record.id)),
             can: (record) => record.can.show,
             title: (record) => `View ${record.name}`,
         }"
         :destroy="{
-            action: (record) => destroyUser.form.delete(record.id),
+             action: (record) => destroyUser.form.delete(String(record.id)),
             can: (record) => record.can.delete,
             title: (record) => `Delete ${record.name}?`,
         }"
