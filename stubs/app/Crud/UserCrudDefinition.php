@@ -18,7 +18,6 @@ use Modules\Crud\CrudDefinition;
 use Modules\Crud\CrudField;
 use Modules\Crud\CrudFilter;
 use Modules\Crud\CrudFormMode;
-use Modules\Crud\CrudOperation;
 use Modules\Rbac\Models\Role;
 
 class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasCrudFilters, HasCrudFormMode, HasCrudOperations, HasDefaultCrudPageSize, HasDefaultCrudSort
@@ -40,9 +39,7 @@ class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
 
     public function disabledOperations(): array
     {
-        return [
-            CrudOperation::Show,
-        ];
+        return [];
     }
 
     public function title(): string

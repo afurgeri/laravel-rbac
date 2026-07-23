@@ -72,13 +72,15 @@ test('rbac integration stubs expose page CRUD and cross-database pagination type
         ->toContain('HasCrudFormMode')
         ->toContain('HasCrudOperations')
         ->toContain('return CrudFormMode::Page;')
-        ->toContain('CrudOperation::Show');
+        ->toContain('return [];')
+        ->not->toContain('CrudOperation::Show');
 
     expect(file_get_contents($moduleRoot.'/stubs/mongodb/app/Crud/UserCrudDefinition.php'))
         ->toContain('HasCrudFormMode')
         ->toContain('HasCrudOperations')
         ->toContain('return CrudFormMode::Page;')
-        ->toContain('CrudOperation::Show');
+        ->toContain('return [];')
+        ->not->toContain('CrudOperation::Show');
 
     expect(file_get_contents($moduleRoot.'/stubs/app/Policies/UserPolicy.php'))
         ->toContain('public function view(User $user, User $model): bool');
