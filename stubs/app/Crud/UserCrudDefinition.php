@@ -5,24 +5,24 @@ namespace App\Crud;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Crud\Concerns\AuthorizesViaGate;
+use Modules\Crud\Concerns\HasDefaultCrudPresentation;
 use Modules\Crud\Contracts\AuthorizesCrudIndex;
 use Modules\Crud\Contracts\AuthorizesCrudMutations;
 use Modules\Crud\Contracts\EagerLoadsCrudRelations;
 use Modules\Crud\Contracts\HasCrudFilters;
-use Modules\Crud\Contracts\HasCrudFormMode;
 use Modules\Crud\Contracts\HasCrudOperations;
+use Modules\Crud\Contracts\HasCrudPresentation;
 use Modules\Crud\Contracts\HasDefaultCrudPageSize;
 use Modules\Crud\Contracts\HasDefaultCrudSort;
 use Modules\Crud\CrudColumn;
 use Modules\Crud\CrudDefinition;
 use Modules\Crud\CrudField;
 use Modules\Crud\CrudFilter;
-use Modules\Crud\CrudFormMode;
 use Modules\Rbac\Models\Role;
 
-class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasCrudFilters, HasCrudFormMode, HasCrudOperations, HasDefaultCrudPageSize, HasDefaultCrudSort
+class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasCrudFilters, HasCrudOperations, HasCrudPresentation, HasDefaultCrudPageSize, HasDefaultCrudSort
 {
-    use AuthorizesViaGate;
+    use AuthorizesViaGate, HasDefaultCrudPresentation;
 
     /**
      * @return class-string<Model>
@@ -30,11 +30,6 @@ class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
     public function model(): string
     {
         return User::class;
-    }
-
-    public function formMode(): CrudFormMode
-    {
-        return CrudFormMode::Page;
     }
 
     public function disabledOperations(): array

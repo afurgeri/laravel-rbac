@@ -69,16 +69,16 @@ test('rbac integration stubs expose page CRUD and cross-database pagination type
         ->toContain("Inertia::render('users/Show'");
 
     expect(file_get_contents($moduleRoot.'/stubs/app/Crud/UserCrudDefinition.php'))
-        ->toContain('HasCrudFormMode')
+        ->toContain('HasCrudPresentation')
+        ->toContain('HasDefaultCrudPresentation')
         ->toContain('HasCrudOperations')
-        ->toContain('return CrudFormMode::Page;')
         ->toContain('return [];')
         ->not->toContain('CrudOperation::Show');
 
     expect(file_get_contents($moduleRoot.'/stubs/mongodb/app/Crud/UserCrudDefinition.php'))
-        ->toContain('HasCrudFormMode')
+        ->toContain('HasCrudPresentation')
+        ->toContain('HasDefaultCrudPresentation')
         ->toContain('HasCrudOperations')
-        ->toContain('return CrudFormMode::Page;')
         ->toContain('return [];')
         ->not->toContain('CrudOperation::Show');
 

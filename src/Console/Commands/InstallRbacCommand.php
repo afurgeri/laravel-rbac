@@ -52,6 +52,14 @@ class InstallRbacCommand extends Command
             return self::FAILURE;
         }
 
+        $crudTypes = base_path('resources/js/types/crud.ts');
+
+        if (! File::exists($crudTypes) || ! str_contains(File::get($crudTypes), 'page_width: CrudLayoutWidth;')) {
+            $this->components->error('Generic CRUD frontend files are outdated. Run [php artisan crud:install --upgrade] first.');
+
+            return self::FAILURE;
+        }
+
         $packageRoot = dirname(__DIR__, 3);
         $targets = [];
 

@@ -4,22 +4,22 @@ namespace Modules\Rbac\Crud;
 
 use Illuminate\Database\Eloquent\Model;
 use Modules\Crud\Concerns\AuthorizesViaGate;
+use Modules\Crud\Concerns\HasDefaultCrudPresentation;
 use Modules\Crud\Contracts\AuthorizesCrudIndex;
 use Modules\Crud\Contracts\AuthorizesCrudMutations;
 use Modules\Crud\Contracts\EagerLoadsCrudRelations;
-use Modules\Crud\Contracts\HasCrudFormMode;
 use Modules\Crud\Contracts\HasCrudOperations;
+use Modules\Crud\Contracts\HasCrudPresentation;
 use Modules\Crud\Contracts\HasDefaultCrudPageSize;
 use Modules\Crud\Contracts\HasDefaultCrudSort;
 use Modules\Crud\CrudColumn;
 use Modules\Crud\CrudDefinition;
 use Modules\Crud\CrudField;
-use Modules\Crud\CrudFormMode;
 use Modules\Rbac\RbacModels;
 
-class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasCrudFormMode, HasCrudOperations, HasDefaultCrudPageSize, HasDefaultCrudSort
+class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasCrudOperations, HasCrudPresentation, HasDefaultCrudPageSize, HasDefaultCrudSort
 {
-    use AuthorizesViaGate;
+    use AuthorizesViaGate, HasDefaultCrudPresentation;
 
     /**
      * @return class-string<Model>
@@ -27,11 +27,6 @@ class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
     public function model(): string
     {
         return RbacModels::role();
-    }
-
-    public function formMode(): CrudFormMode
-    {
-        return CrudFormMode::Page;
     }
 
     public function disabledOperations(): array
