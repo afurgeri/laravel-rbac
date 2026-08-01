@@ -40,7 +40,7 @@ defineOptions({
         :title="`Edit ${role.name}`"
         description="Update the role details and assigned permissions."
         submit-label="Save changes"
-        :defaults="role"
+        :initial-values="role"
     >
         <template #fields="{ errors }">
             <RolePermissionsField

@@ -53,8 +53,14 @@ class InstallRbacCommand extends Command
         }
 
         $crudTypes = base_path('resources/js/types/crud.ts');
+        $crudForm = base_path('resources/js/components/crud/CrudForm.vue');
 
-        if (! File::exists($crudTypes) || ! str_contains(File::get($crudTypes), 'page_width: CrudLayoutWidth;')) {
+        if (
+            ! File::exists($crudTypes)
+            || ! str_contains(File::get($crudTypes), 'page_width: CrudLayoutWidth;')
+            || ! File::exists($crudForm)
+            || ! str_contains(File::get($crudForm), 'field-${field.name}')
+        ) {
             $this->components->error('Generic CRUD frontend files are outdated. Run [php artisan crud:install --upgrade] first.');
 
             return self::FAILURE;

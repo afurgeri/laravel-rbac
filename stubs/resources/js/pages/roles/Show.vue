@@ -39,7 +39,7 @@ defineOptions({
         :title="`View ${role.name}`"
         description="Review the role details and assigned permissions."
         submit-label=""
-        :defaults="role"
+        :initial-values="role"
         :read-only="true"
     >
         <template #fields="{ readOnly }">

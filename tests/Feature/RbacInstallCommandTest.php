@@ -85,6 +85,20 @@ test('rbac integration stubs expose page CRUD and cross-database pagination type
     expect(file_get_contents($moduleRoot.'/stubs/app/Policies/UserPolicy.php'))
         ->toContain('public function view(User $user, User $model): bool');
 
+    foreach ([
+        'roles/Edit.vue',
+        'roles/Show.vue',
+        'users/Edit.vue',
+        'users/Show.vue',
+    ] as $page) {
+        expect(file_get_contents($moduleRoot.'/stubs/resources/js/pages/'.$page))
+            ->toContain(':initial-values=')
+            ->not->toContain(':defaults=');
+    }
+
+    expect(file_get_contents($moduleRoot.'/src/Console/Commands/InstallRbacCommand.php'))
+        ->toContain('field-${field.name}');
+
     expect(file_get_contents($moduleRoot.'/stubs/resources/js/pages/roles/Index.vue'))
         ->toContain('CrudPaginator')
         ->toContain('show as showRole')

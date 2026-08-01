@@ -41,7 +41,7 @@ defineOptions({
         :title="`Edit ${user.name}`"
         description="Update the user details and assigned roles."
         submit-label="Save changes"
-        :defaults="user"
+        :initial-values="user"
         :fields="crud.fields.filter((field) => field.visible_on_update)"
     >
         <template #fields="{ errors }">

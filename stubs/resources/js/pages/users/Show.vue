@@ -40,7 +40,7 @@ defineOptions({
         :title="`View ${user.name}`"
         description="Review the user details and assigned roles."
         submit-label=""
-        :defaults="user"
+        :initial-values="user"
         :fields="crud.fields.filter((field) => field.visible_on_update)"
         :read-only="true"
     >
