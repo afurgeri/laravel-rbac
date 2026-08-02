@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, setLayoutProps } from '@inertiajs/vue3';
 import CrudFormPage from '@/components/crud/CrudFormPage.vue';
 import RolePermissionsField from '@/pages/roles/RolePermissionsField.vue';
+import { useTranslation } from '@/composables/useTranslation';
 import { index as rolesIndex, update as updateRole } from '@/routes/roles';
 import type { CrudSchema } from '@/types/crud';
 
-defineProps<{
+const { role } = defineProps<{
     crud: CrudSchema;
     role: {
         id: string | number;
@@ -15,31 +16,31 @@ defineProps<{
     permissions: { id: string | number; name: string }[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Roles',
-                href: rolesIndex(),
-            },
-            {
-                title: 'Edit role',
-            },
-        ],
-    },
+const { t } = useTranslation();
+
+setLayoutProps({
+    breadcrumbs: [
+        {
+            title: t('Roles'),
+            href: rolesIndex(),
+        },
+        {
+            title: t('Edit :name', { name: role.name }),
+        },
+    ],
 });
 </script>
 
 <template>
-    <Head :title="`Edit ${role.name}`" />
+    <Head :title="t('Edit :name', { name: role.name })" />
 
     <CrudFormPage
         :schema="crud"
          :action="updateRole.form.patch(String(role.id))"
         :back-href="rolesIndex()"
-        :title="`Edit ${role.name}`"
-        description="Update the role details and assigned permissions."
-        submit-label="Save changes"
+        :title="t('Edit :name', { name: role.name })"
+        :description="t('Update the role details and assigned permissions.')"
+        :submit-label="t('Save changes')"
         :initial-values="role"
     >
         <template #fields="{ errors }">

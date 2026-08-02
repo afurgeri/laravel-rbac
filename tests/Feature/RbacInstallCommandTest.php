@@ -107,7 +107,15 @@ test('rbac integration stubs expose page CRUD and cross-database pagination type
     expect(file_get_contents($moduleRoot.'/stubs/resources/js/pages/users/Index.vue'))
         ->toContain('CrudPaginator')
         ->toContain('show as showUser')
-        ->toContain('record.can.show');
+        ->toContain('record.can.show')
+        ->toContain('useTranslation')
+        ->toContain('setLayoutProps')
+        ->toContain("t('Create :name', { name: t('User') })");
+
+    expect(file_get_contents($moduleRoot.'/stubs/resources/js/pages/roles/Index.vue'))
+        ->toContain('useTranslation')
+        ->toContain('setLayoutProps')
+        ->toContain("t('Create :name', { name: t('Role') })");
 
     expect(file_get_contents($moduleRoot.'/stubs/routes-rbac.php'))
         ->toContain("['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']")

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, setLayoutProps } from '@inertiajs/vue3';
 import CrudFormPage from '@/components/crud/CrudFormPage.vue';
 import RolePermissionsField from '@/pages/roles/RolePermissionsField.vue';
+import { useTranslation } from '@/composables/useTranslation';
 import { index as rolesIndex, store as storeRole } from '@/routes/roles';
 import type { CrudSchema } from '@/types/crud';
 
@@ -10,31 +11,31 @@ defineProps<{
     permissions: { id: string | number; name: string }[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Roles',
-                href: rolesIndex(),
-            },
-            {
-                title: 'Create role',
-            },
-        ],
-    },
+const { t } = useTranslation();
+
+setLayoutProps({
+    breadcrumbs: [
+        {
+            title: t('Roles'),
+            href: rolesIndex(),
+        },
+        {
+            title: t('Create :name', { name: t('Role') }),
+        },
+    ],
 });
 </script>
 
 <template>
-    <Head :title="`Create ${crud.title}`" />
+    <Head :title="t('Create :name', { name: t('Role') })" />
 
     <CrudFormPage
         :schema="crud"
         :action="storeRole.form()"
         :back-href="rolesIndex()"
-        title="Create role"
-        description="Add a new role and choose its permissions."
-        submit-label="Create role"
+        :title="t('Create :name', { name: t('Role') })"
+        :description="t('Add a new role and choose its permissions.')"
+        :submit-label="t('Create :name', { name: t('Role') })"
     >
         <template #fields="{ errors }">
             <RolePermissionsField

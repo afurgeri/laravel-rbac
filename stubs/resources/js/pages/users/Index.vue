@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, setLayoutProps } from '@inertiajs/vue3';
 import CrudPage from '@/components/crud/CrudPage.vue';
 import UserPasswordDialog from '@/pages/users/UserPasswordDialog.vue';
 import UserRolesField from '@/pages/users/UserRolesField.vue';
+import { useTranslation } from '@/composables/useTranslation';
 import {
     create as createUser,
     destroy as destroyUser,
@@ -40,15 +41,15 @@ defineProps<{
     };
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Users',
-                href: usersIndex(),
-            },
-        ],
-    },
+const { t } = useTranslation();
+
+setLayoutProps({
+    breadcrumbs: [
+        {
+            title: t('Users'),
+            href: usersIndex(),
+        },
+    ],
 });
 </script>
 
@@ -62,26 +63,26 @@ defineOptions({
             can: can.create,
             href: createUser(),
             action: storeUser.form(),
-            label: 'Create user',
-            title: 'Create user',
-            description: 'Add a new user and choose their roles.',
+            label: t('Create :name', { name: t('User') }),
+            title: t('Create :name', { name: t('User') }),
+            description: t('Add a new user and choose their roles.'),
         }"
         :edit="{
              action: (record) => updateUser.form.patch(String(record.id)),
              href: (record) => editUser(String(record.id)),
             can: (record) => record.can.update,
-            title: (record) => `Edit ${record.name}`,
-            description: 'Update the user details and assigned roles.',
+            title: (record) => t('Edit :name', { name: record.name }),
+            description: t('Update the user details and assigned roles.'),
         }"
         :show="{
              href: (record) => showUser(String(record.id)),
             can: (record) => record.can.show,
-            title: (record) => `View ${record.name}`,
+            title: (record) => t('View :name', { name: record.name }),
         }"
         :destroy="{
              action: (record) => destroyUser.form.delete(String(record.id)),
             can: (record) => record.can.delete,
-            title: (record) => `Delete ${record.name}?`,
+            title: (record) => t('Delete :name?', { name: record.name }),
         }"
     >
         <template #cell-name="{ value }">
