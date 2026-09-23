@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Rbac;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -28,7 +29,7 @@ class RoleController
         $search = $request->string('search')->toString() ?: null;
         $filters = $request->array('filters');
 
-        /** @var LengthAwarePaginator<int, MongoRole> $roles */
+        /** @var LengthAwarePaginator<int, MongoRole>|Paginator<int, MongoRole> $roles */
         $roles = $index->paginate($definition, $request->integer('page', 1), $request->has('per_page') ? $request->integer('per_page') : null, $sort, $direction, $search, $filters);
 
         $roles->through(fn (MongoRole $role): array => [

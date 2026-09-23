@@ -54,7 +54,7 @@ class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
         return [
             CrudColumn::make('id')->sortable(),
             CrudColumn::make('name')->sortable()->searchable(),
-            CrudColumn::make('permission_ids')->computed(),
+            CrudColumn::make('permission_ids')->label('Permissions')->computed(),
         ];
     }
 

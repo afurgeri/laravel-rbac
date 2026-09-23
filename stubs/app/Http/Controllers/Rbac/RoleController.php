@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Rbac;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,7 +29,7 @@ class RoleController
         $search = $request->string('search')->toString() ?: null;
         $filters = $request->array('filters');
 
-        /** @var LengthAwarePaginator<int, Role> $roles */
+        /** @var LengthAwarePaginator<int, Role>|Paginator<int, Role> $roles */
         $roles = $index->paginate(
             definition: $definition,
             page: $request->integer('page', 1),

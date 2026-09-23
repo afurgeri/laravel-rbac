@@ -62,6 +62,9 @@ test('rbac integration stubs expose page CRUD and cross-database pagination type
     expect(file_get_contents($moduleRoot.'/stubs/app/Http/Controllers/Rbac/UserController.php'))
         ->toContain("Inertia::render('users/Show'");
 
+    expect(file_get_contents($moduleRoot.'/stubs/app/Http/Controllers/Rbac/UserController.php'))
+        ->toContain('Password::defaults()');
+
     expect(file_get_contents($moduleRoot.'/stubs/mongodb/app/Http/Controllers/Rbac/RoleController.php'))
         ->toContain("Inertia::render('roles/Show'");
 

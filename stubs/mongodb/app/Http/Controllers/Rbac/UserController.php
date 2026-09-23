@@ -6,8 +6,10 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Crud\Contracts\AuthorizesCrudMutations;
@@ -28,7 +30,7 @@ class UserController
         $search = $request->string('search')->toString() ?: null;
         $filters = $request->array('filters');
 
-        /** @var LengthAwarePaginator<int, User> $users */
+        /** @var LengthAwarePaginator<int, User>|Paginator<int, User> $users */
         $users = $index->paginate($definition, $request->integer('page', 1), $request->has('per_page') ? $request->integer('per_page') : null, $sort, $direction, $search, $filters);
 
         $users->through(fn (User $user): array => [
@@ -138,7 +140,7 @@ class UserController
 
         /** @var array{password: string} $validated */
         $validated = $request->validate([
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', Password::defaults(), 'confirmed'],
         ]);
 
         $user->forceFill(['password' => $validated['password']])->save();
