@@ -8,16 +8,18 @@ use Modules\Crud\Concerns\HasDefaultCrudPresentation;
 use Modules\Crud\Contracts\AuthorizesCrudIndex;
 use Modules\Crud\Contracts\AuthorizesCrudMutations;
 use Modules\Crud\Contracts\EagerLoadsCrudRelations;
+use Modules\Crud\Contracts\HasCrudExport;
 use Modules\Crud\Contracts\HasCrudOperations;
 use Modules\Crud\Contracts\HasCrudPresentation;
 use Modules\Crud\Contracts\HasDefaultCrudPageSize;
 use Modules\Crud\Contracts\HasDefaultCrudSort;
 use Modules\Crud\CrudColumn;
 use Modules\Crud\CrudDefinition;
+use Modules\Crud\CrudExportColumn;
 use Modules\Crud\CrudField;
 use Modules\Rbac\RbacModels;
 
-class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasCrudOperations, HasCrudPresentation, HasDefaultCrudPageSize, HasDefaultCrudSort
+class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasCrudExport, HasCrudOperations, HasCrudPresentation, HasDefaultCrudPageSize, HasDefaultCrudSort
 {
     use AuthorizesViaGate, HasDefaultCrudPresentation;
 
@@ -62,6 +64,16 @@ class RoleCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
     {
         return [
             CrudField::make('name', ['required', 'string', 'max:255'])->unique(),
+        ];
+    }
+
+    public function exportColumns(): array
+    {
+        return [
+            CrudExportColumn::make('id')->header('ID'),
+            CrudExportColumn::make('name')->header('Name'),
+            CrudExportColumn::make('permissions')->header('Permissions')
+                ->valueUsing(fn (Model $record): string => $record->getRelation('permissions')->pluck('name')->implode(', ')),
         ];
     }
 

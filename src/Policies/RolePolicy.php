@@ -8,6 +8,11 @@ use Modules\Rbac\RbacPermissions;
 
 class RolePolicy
 {
+    public function export(HasPermissions $user): bool
+    {
+        return $user->hasPermission(RbacPermissions::EXPORT_ROLES);
+    }
+
     public function viewAny(HasPermissions $user): bool
     {
         return $user->hasPermission(RbacPermissions::VIEW_ROLES);

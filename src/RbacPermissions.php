@@ -12,6 +12,8 @@ final class RbacPermissions
 
     public const DELETE_ROLES = 'roles.delete';
 
+    public const EXPORT_ROLES = 'roles.export';
+
     public const VIEW_USERS = 'users.view';
 
     public const CREATE_USERS = 'users.create';
@@ -19,6 +21,8 @@ final class RbacPermissions
     public const UPDATE_USERS = 'users.update';
 
     public const DELETE_USERS = 'users.delete';
+
+    public const EXPORT_USERS = 'users.export';
 
     /**
      * @return list<string>
@@ -30,10 +34,12 @@ final class RbacPermissions
             self::CREATE_ROLES,
             self::UPDATE_ROLES,
             self::DELETE_ROLES,
+            self::EXPORT_ROLES,
             self::VIEW_USERS,
             self::CREATE_USERS,
             self::UPDATE_USERS,
             self::DELETE_USERS,
+            self::EXPORT_USERS,
         ];
     }
 }

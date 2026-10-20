@@ -7,6 +7,11 @@ use Modules\Rbac\RbacPermissions;
 
 class UserPolicy
 {
+    public function export(User $user): bool
+    {
+        return $user->hasPermission(RbacPermissions::EXPORT_USERS);
+    }
+
     public function viewAny(User $user): bool
     {
         return $user->hasPermission(RbacPermissions::VIEW_USERS);

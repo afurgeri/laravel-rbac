@@ -66,19 +66,19 @@ setLayoutProps({
             description: t('Add a new role and choose its permissions.'),
         }"
         :edit="{
-             action: (record) => updateRole.form.patch(String(record.id)),
-             href: (record) => editRole(String(record.id)),
+            action: (record) => updateRole.form.patch(String(record.id)),
+            href: (record) => editRole(String(record.id)),
             can: (record) => record.can.update,
             title: (record) => t('Edit :name', { name: record.name }),
             description: t('Update the role details and assigned permissions.'),
         }"
         :show="{
-             href: (record) => showRole(String(record.id)),
+            href: (record) => showRole(String(record.id)),
             can: (record) => record.can.show,
             title: (record) => t('View :name', { name: record.name }),
         }"
         :destroy="{
-             action: (record) => destroyRole.form.delete(String(record.id)),
+            action: (record) => destroyRole.form.delete(String(record.id)),
             can: (record) => record.can.delete,
             title: (record) => t('Delete :name?', { name: record.name }),
         }"

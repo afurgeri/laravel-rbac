@@ -9,6 +9,7 @@ use Modules\Crud\Concerns\HasDefaultCrudPresentation;
 use Modules\Crud\Contracts\AuthorizesCrudIndex;
 use Modules\Crud\Contracts\AuthorizesCrudMutations;
 use Modules\Crud\Contracts\EagerLoadsCrudRelations;
+use Modules\Crud\Contracts\HasCrudExport;
 use Modules\Crud\Contracts\HasCrudFilters;
 use Modules\Crud\Contracts\HasCrudOperations;
 use Modules\Crud\Contracts\HasCrudPresentation;
@@ -16,11 +17,12 @@ use Modules\Crud\Contracts\HasDefaultCrudPageSize;
 use Modules\Crud\Contracts\HasDefaultCrudSort;
 use Modules\Crud\CrudColumn;
 use Modules\Crud\CrudDefinition;
+use Modules\Crud\CrudExportColumn;
 use Modules\Crud\CrudField;
 use Modules\Crud\CrudFilter;
 use Modules\Rbac\Models\MongoRole;
 
-class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasCrudFilters, HasCrudOperations, HasCrudPresentation, HasDefaultCrudPageSize, HasDefaultCrudSort
+class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations, CrudDefinition, EagerLoadsCrudRelations, HasCrudExport, HasCrudFilters, HasCrudOperations, HasCrudPresentation, HasDefaultCrudPageSize, HasDefaultCrudSort
 {
     use AuthorizesViaGate, HasDefaultCrudPresentation;
 
@@ -73,6 +75,17 @@ class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
     public function eagerLoads(): array
     {
         return ['roles:id,name,user_ids'];
+    }
+
+    public function exportColumns(): array
+    {
+        return [
+            CrudExportColumn::make('id')->header('ID'),
+            CrudExportColumn::make('name')->header('Name'),
+            CrudExportColumn::make('email')->header('Email'),
+            CrudExportColumn::make('roles')->header('Roles')
+                ->valueUsing(fn (Model $record): string => $record->getRelation('roles')->pluck('name')->implode(', ')),
+        ];
     }
 
     public function defaultSortColumn(): string

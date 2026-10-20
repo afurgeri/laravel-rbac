@@ -121,6 +121,7 @@ test('rbac integration stubs expose page CRUD and cross-database pagination type
         ->toContain("t('Create :name', { name: t('Role') })");
 
     expect(file_get_contents($moduleRoot.'/stubs/routes-rbac.php'))
-        ->toContain("['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']")
+        ->toContain("Route::crudResource('roles', RoleController::class, Role::class)")
+        ->toContain("Route::crudResource('users', UserController::class, User::class)")
         ->toContain("Route::patch('users/{user}/password'");
 });
