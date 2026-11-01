@@ -12,6 +12,7 @@ const { user } = defineProps<{
         id: string | number;
         name: string;
         email: string;
+        is_active: boolean;
         role_ids: (string | number)[];
     };
     roles: { id: string | number; name: string }[];
@@ -37,7 +38,7 @@ setLayoutProps({
 
     <CrudFormPage
         :schema="crud"
-         :action="updateUser.form.patch(String(user.id))"
+        :action="updateUser.form.patch(String(user.id))"
         :back-href="usersIndex()"
         :title="t('Edit :name', { name: user.name })"
         :description="t('Update the user details and assigned roles.')"

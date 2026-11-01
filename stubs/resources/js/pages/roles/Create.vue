@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { Head, setLayoutProps } from '@inertiajs/vue3';
 import CrudFormPage from '@/components/crud/CrudFormPage.vue';
-import RolePermissionsField from '@/pages/roles/RolePermissionsField.vue';
 import { useTranslation } from '@/composables/useTranslation';
+import RolePermissionsField from '@/pages/roles/RolePermissionsField.vue';
 import { index as rolesIndex, store as storeRole } from '@/routes/roles';
 import type { CrudSchema } from '@/types/crud';
+import type { RolePermission } from '@/types/roles';
 
 defineProps<{
     crud: CrudSchema;
-    permissions: { id: string | number; name: string }[];
+    permissions: RolePermission[];
 }>();
 
 const { t } = useTranslation();

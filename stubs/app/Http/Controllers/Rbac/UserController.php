@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Rbac;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Crud\Contracts\AuthorizesCrudMutations;
@@ -45,7 +47,9 @@ class UserController
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'roles' => $user->roles->map(fn (Model $role): array => ['id' => $role->getKey(), 'name' => $role->getAttribute('name')])->all(),
             'role_ids' => $user->roles->pluck('id')->all(),
+            'is_active' => $user->is_active,
             'can' => [
                 'update' => Gate::allows('update', $user),
                 'delete' => Gate::allows('delete', $user),
@@ -113,6 +117,7 @@ class UserController
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'is_active' => $user->is_active,
                 'role_ids' => $user->roles()->pluck('id')->all(),
             ],
             'roles' => $this->availableRoles(),
@@ -131,6 +136,7 @@ class UserController
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'is_active' => $user->is_active,
                 'role_ids' => $user->roles()->pluck('id')->all(),
             ],
             'roles' => $this->availableRoles(),
@@ -146,6 +152,12 @@ class UserController
         }
 
         $roleIds = $this->validatedRoleIds($request);
+
+        if ($user->is($request->user()) && ! $request->boolean('is_active')) {
+            throw ValidationException::withMessages([
+                'is_active' => __('You cannot deactivate your own account.'),
+            ]);
+        }
 
         $mutations->update($user, User::makeCrudDefinition(), $request->all());
         $user->roles()->sync($roleIds);

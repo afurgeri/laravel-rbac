@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, setLayoutProps } from '@inertiajs/vue3';
 import CrudFormPage from '@/components/crud/CrudFormPage.vue';
-import RolePermissionsField from '@/pages/roles/RolePermissionsField.vue';
 import { useTranslation } from '@/composables/useTranslation';
+import RolePermissionsField from '@/pages/roles/RolePermissionsField.vue';
 import { index as rolesIndex, update as updateRole } from '@/routes/roles';
 import type { CrudSchema } from '@/types/crud';
+import type { RolePermission } from '@/types/roles';
 
 const { role } = defineProps<{
     crud: CrudSchema;
@@ -13,7 +14,7 @@ const { role } = defineProps<{
         name: string;
         permission_ids: (string | number)[];
     };
-    permissions: { id: string | number; name: string }[];
+    permissions: RolePermission[];
 }>();
 
 const { t } = useTranslation();
@@ -36,7 +37,7 @@ setLayoutProps({
 
     <CrudFormPage
         :schema="crud"
-         :action="updateRole.form.patch(String(role.id))"
+        :action="updateRole.form.patch(String(role.id))"
         :back-href="rolesIndex()"
         :title="t('Edit :name', { name: role.name })"
         :description="t('Update the role details and assigned permissions.')"

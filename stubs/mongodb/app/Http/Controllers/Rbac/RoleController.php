@@ -18,6 +18,7 @@ use Modules\Crud\CrudOperationGuard;
 use Modules\Crud\CrudSchemaManager;
 use Modules\Rbac\Models\MongoPermission;
 use Modules\Rbac\Models\MongoRole;
+use Modules\Rbac\PermissionCatalog;
 
 class RoleController
 {
@@ -154,12 +155,12 @@ class RoleController
     }
 
     /**
-     * @return list<array{id: string, name: string}>
+     * Permissions with a readable label, grouped by what they cover and in the usual action order.
+     *
+     * @return list<array{id: int|string, name: string, label: string, subject: string, column: 'view'|'create'|'update'|'delete'|null, action: string}>
      */
     private function availablePermissions(): array
     {
-        return MongoPermission::query()->orderBy('name')->get(['id', 'name'])
-            ->map(fn (MongoPermission $permission): array => ['id' => (string) $permission->getKey(), 'name' => $permission->name])
-            ->values()->all();
+        return app(PermissionCatalog::class)->all();
     }
 }

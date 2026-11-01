@@ -57,9 +57,11 @@ class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
     public function columns(): array
     {
         return [
-            CrudColumn::make('id')->sortable(),
+            CrudColumn::make('id')->hidden(),
             CrudColumn::make('name')->sortable()->searchable(),
             CrudColumn::make('email')->sortable()->searchable(),
+            CrudColumn::make('roles'),
+            CrudColumn::make('is_active')->sortable()->label(__('Active')),
         ];
     }
 
@@ -69,6 +71,7 @@ class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
             CrudField::make('name', ['required', 'string', 'max:255']),
             CrudField::make('email', ['required', 'email', 'max:255'])->unique()->email(),
             CrudField::make('password', ['required', 'string', 'min:8'])->createOnly()->password()->confirmed(),
+            CrudField::make('is_active', ['required', 'boolean'])->checkbox()->default(true)->label(__('Active')),
         ];
     }
 
@@ -83,6 +86,8 @@ class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
             CrudExportColumn::make('id')->header('ID'),
             CrudExportColumn::make('name')->header('Name'),
             CrudExportColumn::make('email')->header('Email'),
+            CrudExportColumn::make('is_active')->header('Active')
+                ->valueUsing(fn (Model $record): string => $record->getAttribute('is_active') ? __('Yes') : __('No')),
             CrudExportColumn::make('roles')->header('Roles')
                 ->valueUsing(fn (Model $record): string => $record->getRelation('roles')->pluck('name')->implode(', ')),
         ];
@@ -110,12 +115,10 @@ class UserCrudDefinition implements AuthorizesCrudIndex, AuthorizesCrudMutations
                 ->select(fn (): array => MongoRole::query()->orderBy('name')->pluck('name', 'id')->all())
                 ->relation('roles', 'id')
                 ->clearable(),
-            CrudFilter::make('created_from', 'created_at')->date()->operator('>=')->range('created_at')
-                ->default(fn (): string => now()->startOfMonth()->toDateString())
-                ->maxDate(fn (): string => now()->toDateString()),
-            CrudFilter::make('created_to', 'created_at')->date()->operator('<=')->range('created_at')
-                ->default(fn (): string => now()->toDateString())
-                ->maxDate(fn (): string => now()->toDateString()),
+            CrudFilter::make('is_active')
+                ->select(['1' => __('Active'), '0' => __('Inactive')])
+                ->clearable()
+                ->label(__('Status')),
         ];
     }
 }

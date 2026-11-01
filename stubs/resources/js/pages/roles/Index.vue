@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head, setLayoutProps } from '@inertiajs/vue3';
 import CrudPage from '@/components/crud/CrudPage.vue';
-import RolePermissionsField from '@/pages/roles/RolePermissionsField.vue';
 import { useTranslation } from '@/composables/useTranslation';
+import RolePermissionsField from '@/pages/roles/RolePermissionsField.vue';
+import RolePermissionsSummary from '@/pages/roles/RolePermissionsSummary.vue';
 import {
     create as createRole,
     destroy as destroyRole,
@@ -13,6 +14,7 @@ import {
     update as updateRole,
 } from '@/routes/roles';
 import type { CrudPaginator, CrudRecord, CrudSchema } from '@/types/crud';
+import type { RolePermission } from '@/types/roles';
 
 type Role = CrudRecord & {
     id: string | number;
@@ -25,10 +27,7 @@ type Role = CrudRecord & {
     };
 };
 
-type Permission = {
-    id: string | number;
-    name: string;
-};
+type Permission = RolePermission;
 
 defineProps<{
     crud: CrudSchema;
@@ -85,6 +84,14 @@ setLayoutProps({
     >
         <template #cell-name="{ value }">
             <span class="font-medium">{{ value }}</span>
+        </template>
+
+        <template #cell-permission_ids="{ record }">
+            <RolePermissionsSummary
+                :permission-ids="record.permission_ids"
+                :permissions="permissions"
+                :role-name="record.name"
+            />
         </template>
 
         <template #create-fields="{ errors }">

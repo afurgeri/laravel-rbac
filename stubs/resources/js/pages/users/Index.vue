@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, setLayoutProps } from '@inertiajs/vue3';
 import CrudPage from '@/components/crud/CrudPage.vue';
+import { Badge } from '@/components/ui/badge';
 import UserPasswordDialog from '@/pages/users/UserPasswordDialog.vue';
 import UserRolesField from '@/pages/users/UserRolesField.vue';
 import { useTranslation } from '@/composables/useTranslation';
@@ -19,7 +20,9 @@ type User = CrudRecord & {
     id: string | number;
     name: string;
     email: string;
+    roles: Role[];
     role_ids: Array<string | number>;
+    is_active: boolean;
     can: {
         show: boolean;
         update: boolean;
@@ -87,6 +90,20 @@ setLayoutProps({
     >
         <template #cell-name="{ value }">
             <span class="font-medium">{{ value }}</span>
+        </template>
+
+        <template #cell-roles="{ value }">
+            <div class="flex flex-wrap gap-1">
+                <Badge v-for="role in value as Role[]" :key="role.id">
+                    {{ role.name }}
+                </Badge>
+            </div>
+        </template>
+
+        <template #cell-is_active="{ value }">
+            <Badge :variant="value ? 'secondary' : 'outline'">
+                {{ value ? t('Active') : t('Inactive') }}
+            </Badge>
         </template>
 
         <template #actions-before="{ record }">

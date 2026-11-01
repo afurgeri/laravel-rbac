@@ -9,6 +9,9 @@ This package provides the reusable RBAC core:
 - SQL and MongoDB role and permission models;
 - `HasRoles` and `HasPermissions` integration contracts;
 - permission middleware;
+- deactivated users: column, model trait, session middleware and login callback;
+- an initial administrator seeder;
+- a permission catalog with readable, translated labels for the role screens;
 - configurable RBAC tables and user model;
 - migrations and permission seeders;
 - role authorization through Laravel policies;
@@ -31,7 +34,24 @@ php artisan crud:install
 php artisan rbac:install --database=mysql
 ```
 
-`rbac:install` generates the user/role CRUD definitions, controllers, policy, routes, and Inertia/Vue pages. It requires the generic CRUD frontend files from `crud:install` and reports the required `User` model integration without modifying the model automatically.
+`rbac:install` generates the user/role CRUD definitions, controllers, policy, routes, and Inertia/Vue pages. It requires the generic CRUD frontend files from `crud:install`.
+
+On a fresh Laravel Vue starter kit it also wires the integration into the application files, and reports each one as `UPDATED`, `ALREADY INTEGRATED` or `MANUAL`:
+
+| File | Change |
+| --- | --- |
+| `app/Models/User.php` | `HasRoles`, `CanBeDeactivated`, `HasCrudDefinition`, `HasPermissions` and `crudDefinition()` (SQL only) |
+| `database/seeders/DatabaseSeeder.php` | Calls `RbacPermissionSeeder`, `AdminRoleSeeder` and `AdminUserSeeder` instead of the test user |
+| `bootstrap/app.php` | Adds `EnsureUserIsActive` to the `web` middleware group |
+| `app/Providers/FortifyServiceProvider.php` | `Fortify::authenticateUsing(new AuthenticateActiveUser)` |
+| `app/Http/Middleware/HandleInertiaRequests.php` | Shares `auth.permissions` as a once prop keyed by user |
+| `resources/js/types/auth.ts` | Adds `permissions: string[]` to `Auth` |
+
+Files that no longer look like the starter kit are left untouched and listed with the change to make by hand. Running the installer again is safe. Afterwards run:
+
+```bash
+php artisan migrate --seed
+```
 
 For MongoDB, install the official driver in the consuming application and select the MongoDB integration stubs:
 
@@ -112,6 +132,7 @@ The essential changes compared with the default Laravel model are:
 
 - Replace `Illuminate\Foundation\Auth\User` with `MongoDB\Laravel\Auth\User`.
 - Keep `HasRoles` and `HasPermissions` on the same model used by the configured auth provider.
+- Add `CanBeDeactivated` and `HasCrudDefinition` (returning `App\Crud\UserCrudDefinition::class` from `crudDefinition()`) for the generated user screens.
 - Set the `mongodb` connection and the `users` collection/table.
 - Store `name`, `email`, `password`, `remember_token`, and any fields required by the application's authentication features in the user document.
 - Keep the password hashed and hidden. Do not store a plain-text password.
@@ -179,6 +200,45 @@ php artisan vendor:publish --tag=rbac-config
 php artisan vendor:publish --tag=rbac-migrations
 php artisan migrate
 ```
+
+## Initial administrator
+
+`AdminUserSeeder` creates the first user and gives it the protected role. Run it after `AdminRoleSeeder`. The credentials come from `config/rbac.php`:
+
+```dotenv
+RBAC_ADMIN_NAME=Admin
+RBAC_ADMIN_EMAIL=admin@example.com
+RBAC_ADMIN_PASSWORD=password
+```
+
+## Deactivated users
+
+Users can be deactivated instead of deleted. The package migration adds a boolean `is_active` column to the configured users table unless it already exists. The `CanBeDeactivated` trait makes the flag fillable, casts it, and starts new users active. Users stored before the column existed count as active.
+
+- `Modules\Rbac\Http\Middleware\EnsureUserIsActive` logs out a user deactivated during an open session and redirects to `login` with an error.
+- `Modules\Rbac\Auth\AuthenticateActiveUser` is a Fortify login callback that rejects deactivated users once their password is confirmed, so a wrong password still gets the usual error.
+- The generated user screens show the status, filter by it, and stop users from deactivating their own account.
+
+## Role screens
+
+The role form shows permissions as a table: one row per resource, with view, create, edit and delete columns, and any other action listed under the resource name. The role list shows the first permissions and a dialog with the rest.
+
+`Modules\Rbac\PermissionCatalog` builds the labelled, ordered list from the stored permissions. Name each resource and any extra action in `config/rbac.php`; values are translation keys:
+
+```php
+'permission_subjects' => [
+    'roles' => 'Roles',
+    'users' => 'Users',
+    'customers' => 'Customers',
+],
+
+'permission_actions' => [
+    'export' => 'Export',
+    'leads.convert' => 'Convert to member',
+],
+```
+
+A permission whose prefix is not listed is shown with its raw name. The package ships English and Spanish translations for its own labels.
 
 ## Permissions
 

@@ -4,6 +4,7 @@ namespace Modules\Rbac\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Modules\Rbac\Console\ApplicationPatcher;
 
 class InstallRbacCommand extends Command
 {
@@ -22,6 +23,8 @@ class InstallRbacCommand extends Command
         'stubs/resources/js/pages/roles/Edit.vue' => 'resources/js/pages/roles/Edit.vue',
         'stubs/resources/js/pages/roles/Show.vue' => 'resources/js/pages/roles/Show.vue',
         'stubs/resources/js/pages/roles/RolePermissionsField.vue' => 'resources/js/pages/roles/RolePermissionsField.vue',
+        'stubs/resources/js/pages/roles/RolePermissionsSummary.vue' => 'resources/js/pages/roles/RolePermissionsSummary.vue',
+        'stubs/resources/js/types/roles.ts' => 'resources/js/types/roles.ts',
         'stubs/resources/js/pages/users/Index.vue' => 'resources/js/pages/users/Index.vue',
         'stubs/resources/js/pages/users/Create.vue' => 'resources/js/pages/users/Create.vue',
         'stubs/resources/js/pages/users/Edit.vue' => 'resources/js/pages/users/Edit.vue',
@@ -91,20 +94,32 @@ class InstallRbacCommand extends Command
             return self::FAILURE;
         }
 
+        $patcher = new ApplicationPatcher;
+
         foreach ($targets as $file) {
             File::ensureDirectoryExists(dirname($file['target']));
             File::copy($file['source'], $file['target']);
+
+            if ($database === 'mysql' && str_ends_with($file['target'], '.vue')) {
+                File::put($file['target'], $patcher->numericRouteKeys(File::get($file['target'])));
+            }
         }
 
         $this->appendRouteRequire();
 
         $this->components->info('RBAC application integration installed.');
+
+        $manual = $this->patchApplicationFiles($patcher, $database);
+
         $this->newLine();
-        $this->components->warn('Update App\\Models\\User to use HasRoles and implement HasPermissions.');
+
+        foreach ($manual as $instruction) {
+            $this->components->warn($instruction);
+        }
+
         $this->line($database === 'mongodb'
-            ? 'Then configure the MongoDB connection and run your application seeders.'
-            : 'Then run: php artisan migrate');
-        $this->line('Then register your application seeders in DatabaseSeeder.');
+            ? 'Then configure the MongoDB connection and run: php artisan db:seed'
+            : 'Then run: php artisan migrate --seed');
 
         return self::SUCCESS;
     }
@@ -131,6 +146,73 @@ class InstallRbacCommand extends Command
             ];
 
         return [...$files, ...self::FILES];
+    }
+
+    /**
+     * Applies the starter kit integration and returns what still has to be done by hand.
+     *
+     * @return list<string>
+     */
+    private function patchApplicationFiles(ApplicationPatcher $patcher, string $database): array
+    {
+        $patches = [
+            'app/Models/User.php' => [
+                fn (string $contents): array => $patcher->userModel($contents),
+                'Update App\\Models\\User to use HasRoles, CanBeDeactivated and HasCrudDefinition, and implement HasPermissions.',
+            ],
+            'database/seeders/DatabaseSeeder.php' => [
+                fn (string $contents): array => $patcher->databaseSeeder($contents),
+                'Call RbacPermissionSeeder, AdminRoleSeeder and AdminUserSeeder from DatabaseSeeder.',
+            ],
+            'bootstrap/app.php' => [
+                fn (string $contents): array => $patcher->bootstrapApp($contents),
+                'Append Modules\\Rbac\\Http\\Middleware\\EnsureUserIsActive to the web middleware group.',
+            ],
+            'app/Providers/FortifyServiceProvider.php' => [
+                fn (string $contents): array => $patcher->fortifyServiceProvider($contents),
+                'Reject deactivated users at login, e.g. Fortify::authenticateUsing(new AuthenticateActiveUser).',
+            ],
+            'app/Http/Middleware/HandleInertiaRequests.php' => [
+                fn (string $contents): array => $patcher->inertiaMiddleware($contents),
+                "Share the user's permissions as auth.permissions from HandleInertiaRequests.",
+            ],
+            'resources/js/types/auth.ts' => [
+                fn (string $contents): array => $patcher->authTypes($contents),
+                'Add permissions: string[] to the Auth type.',
+            ],
+        ];
+
+        if ($database === 'mongodb') {
+            unset($patches['app/Models/User.php']);
+        }
+
+        $manual = $database === 'mongodb'
+            ? ['Update App\\Models\\User to extend the MongoDB authenticatable model, use HasRoles, CanBeDeactivated and HasCrudDefinition, and implement HasPermissions.']
+            : [];
+
+        foreach ($patches as $relativePath => [$patch, $instruction]) {
+            $path = base_path($relativePath);
+
+            if (! File::exists($path)) {
+                $manual[] = $instruction;
+
+                continue;
+            }
+
+            $result = $patch(File::get($path));
+
+            if ($result['status'] === ApplicationPatcher::PATCHED) {
+                File::put($path, $result['contents']);
+                $this->components->twoColumnDetail($relativePath, '<fg=green>UPDATED</>');
+            } elseif ($result['status'] === ApplicationPatcher::ALREADY_PATCHED) {
+                $this->components->twoColumnDetail($relativePath, '<fg=gray>ALREADY INTEGRATED</>');
+            } else {
+                $this->components->twoColumnDetail($relativePath, '<fg=yellow>MANUAL</>');
+                $manual[] = $instruction;
+            }
+        }
+
+        return $manual;
     }
 
     private function appendRouteRequire(): void

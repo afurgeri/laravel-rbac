@@ -33,6 +33,10 @@ test('rbac install selects connector-specific integration stubs', function () {
         ->toHaveKey('stubs/mongodb/app/Http/Controllers/Rbac/RoleController.php')
         ->toHaveKey('stubs/mongodb/app/Http/Controllers/Rbac/UserController.php');
 
+    expect($mysqlFiles)
+        ->toHaveKey('stubs/resources/js/pages/roles/RolePermissionsSummary.vue')
+        ->toHaveKey('stubs/resources/js/types/roles.ts');
+
     foreach (['roles', 'users'] as $resource) {
         foreach (['Index', 'Create', 'Edit', 'Show'] as $page) {
             expect($mysqlFiles)

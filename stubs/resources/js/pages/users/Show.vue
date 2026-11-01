@@ -12,6 +12,7 @@ const { user } = defineProps<{
         id: string | number;
         name: string;
         email: string;
+        is_active: boolean;
         role_ids: (string | number)[];
     };
     roles: { id: string | number; name: string }[];

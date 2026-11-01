@@ -42,6 +42,25 @@ trait HasRoles
         );
     }
 
+    /**
+     * Names of every permission granted through the user's roles.
+     *
+     * @return list<string>
+     */
+    public function permissionNames(): array
+    {
+        return array_values($this->roles()
+            ->with('permissions')
+            ->get()
+            ->flatMap(fn (Model $role): array => method_exists($role, 'permissions')
+                ? $role->getRelation('permissions')->all()
+                : [])
+            ->map(fn (Model $permission): string => (string) $permission->getAttribute('name'))
+            ->unique()
+            ->values()
+            ->all());
+    }
+
     public function hasPermission(string $permission): bool
     {
         return $this->permissionCache[$permission] ??= $this->roles()

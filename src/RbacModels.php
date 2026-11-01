@@ -28,6 +28,18 @@ final class RbacModels
     }
 
     /**
+     * The application's authenticatable model, falling back to the default auth provider.
+     *
+     * @return class-string<Model>
+     */
+    public static function user(): string
+    {
+        $configured = config('rbac.models.user') ?: config('auth.providers.users.model');
+
+        return self::resolve('user', is_string($configured) ? $configured : '');
+    }
+
+    /**
      * @return class-string<Model>
      */
     private static function resolve(string $key, string $default): string

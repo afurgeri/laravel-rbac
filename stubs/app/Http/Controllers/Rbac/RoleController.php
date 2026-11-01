@@ -15,8 +15,8 @@ use Modules\Crud\CrudMutationManager;
 use Modules\Crud\CrudOperation;
 use Modules\Crud\CrudOperationGuard;
 use Modules\Crud\CrudSchemaManager;
-use Modules\Rbac\Models\Permission;
 use Modules\Rbac\Models\Role;
+use Modules\Rbac\PermissionCatalog;
 
 class RoleController
 {
@@ -175,18 +175,12 @@ class RoleController
     }
 
     /**
-     * @return list<array{id: int, name: string}>
+     * Permissions with a readable label, grouped by what they cover and in the usual action order.
+     *
+     * @return list<array{id: int|string, name: string, label: string, subject: string, column: 'view'|'create'|'update'|'delete'|null, action: string}>
      */
     private function availablePermissions(): array
     {
-        return array_values(Permission::query()
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(fn (Permission $permission): array => [
-                'id' => $permission->id,
-                'name' => $permission->name,
-            ])
-            ->values()
-            ->all());
+        return app(PermissionCatalog::class)->all();
     }
 }

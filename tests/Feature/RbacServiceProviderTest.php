@@ -39,3 +39,21 @@ test('the SQL seeders remain idempotent', function () {
     expect(Permission::query()->count())->toBe(count(RbacPermissions::all()))
         ->and($admin->permissions)->toHaveCount(count(RbacPermissions::all()));
 });
+
+test('the migration adds the active flag to the users table once', function () {
+    $this->artisan('migrate')->assertExitCode(0);
+    $this->artisan('migrate:rollback')->assertExitCode(0);
+    $this->artisan('migrate')->assertExitCode(0);
+
+    expect(Schema::hasColumn('users', 'is_active'))->toBeTrue();
+});
+
+test('the migration keeps an active flag the application already added', function () {
+    Schema::table('users', function (Blueprint $table): void {
+        $table->boolean('is_active')->default(false);
+    });
+
+    $this->artisan('migrate')->assertExitCode(0);
+
+    expect(Schema::getColumns('users'))->toHaveCount(2);
+});
